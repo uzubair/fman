@@ -1,0 +1,21 @@
+Metadata-Version: 2.1
+Name: fman
+Version: 1.0.0
+Summary: A simple file manager to find/ delete duplicate files.
+Home-page: UNKNOWN
+Author: Usman Zubair
+Author-email: uzubair@gmail.com
+License: UNKNOWN
+Description: UNKNOWN
+Platform: UNKNOWN
+Classifier: Development Status :: 3 - Alpha
+Classifier: Environment :: Console
+Classifier: Intended Audience :: Developers
+Classifier: License :: Other/Proprietary License
+Classifier: Natural Language :: English
+Classifier: Operating System :: MacOS
+Classifier: Operating System :: POSIX :: Linux
+Classifier: Programming Language :: Python :: 3 :: Only
+Classifier: Programming Language :: Python :: 3
+Requires-Python: >=3
+Provides-Extra: devel

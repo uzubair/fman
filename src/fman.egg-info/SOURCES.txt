@@ -1,0 +1,13 @@
+README.md
+setup.py
+src/fman/__init__.py
+src/fman/cmd.py
+src/fman/fmanager.py
+src/fman/meta.py
+src/fman/utils.py
+src/fman.egg-info/PKG-INFO
+src/fman.egg-info/SOURCES.txt
+src/fman.egg-info/dependency_links.txt
+src/fman.egg-info/entry_points.txt
+src/fman.egg-info/requires.txt
+src/fman.egg-info/top_level.txt
