@@ -1,14 +1,32 @@
-""" Console entrypoint """
+"""  Console entrypoint """
 
 import logging
 import os
 import timeit
 from argparse import ArgumentParser
-from fman.utils import execution_time
+from fman.utils import execution_time, is_directory
 from fman.fmanager import find, duplicate
-from fman.task import TaskManager
+from fman.task import ThreadPoolManager
+
 
 log = logging.getLogger("i.cmd")
+
+
+def run(options):
+    # Performs the selected op
+    thread_pool_manager = ThreadPoolManager(num_threads=2)
+    num_paths = len(options.path)
+    fresults = {}
+    for i, path in enumerate(options.path, 1):
+        log.info("Processing {} of {}. Path = '{}'".format(i, num_paths, path))
+        if not is_directory(path):
+            log.info(f"{path} is not a valid directory!")
+            continue
+        thread_pool_manager.add_task(options.func, path, options.filter, fresults)
+    thread_pool_manager.wait_completion()
+    log.info("Found {} files".format(len(fresults)))
+    for file, size in fresults.items():
+        print("{}={}".format(file, size))
 
 
 def main():
@@ -38,8 +56,7 @@ def main():
 
     log.info(args.msg)
 
-    task_manager = TaskManager(args)
-    task_manager.execute()
+    run(args)
 
     duration = timeit.default_timer() - start_time
     hours, mins, secs = execution_time(duration)

@@ -3,9 +3,11 @@
 import logging
 import os
 import fnmatch
+from threading import Lock
 
 log = logging.getLogger("i.utils")
 
+lock = Lock()
 
 def execution_time(duration):
     mins, secs = divmod(duration, 60)
@@ -25,8 +27,7 @@ def get_size(path):
     return os.path.getsize(path)
 
 
-def ls(path, filter):
-    fresults = {}
+def ls(path, filter, fresults):
     for root, dirnames, filenames in os.walk(path):
         for filename in filenames:
             try:
@@ -42,4 +43,3 @@ def ls(path, filter):
                 # Permissions issues for symlinked files
                 # pass on
                 continue
-    return fresults

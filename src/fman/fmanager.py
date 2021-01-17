@@ -2,9 +2,12 @@ import logging
 import hashlib
 from collections import defaultdict
 from fman.utils import is_directory, is_file, ls
-
+from fman.task import ThreadPoolManager
+from threading import Lock
 
 log = logging.getLogger("i.fmanager")
+
+lock = Lock()
 
 
 def chunk_reader(file, chunk_size=1024):
@@ -25,14 +28,16 @@ def get_hash(fpath, first_chunk=True):
     hashed = hash_obj.digest()
     return hashed
 
-def find(path, options):
-    if not is_directory(path):
-        log.info(f"{path} is not a valid directory!")
-        return None
-    return path, ls(path, options.filter)
+def find(path, filter, fresults):
+    files = {}
+    ls(path, filter, files)
+    with lock:
+        for file, size in files.items():
+            fresults[file] = size
 
-def duplicate(path, options):
-    _, files = find(path, options)
+def duplicate(path, filter, fresults):
+    files = {}
+    find(path, filter, files)
     hashes = defaultdict(list)
     for fpath, size in files.items():
         hashes[size].append(fpath)

@@ -1,34 +1,48 @@
 import logging
-from concurrent.futures import ThreadPoolExecutor, as_completed
-
+from queue import Queue
+from threading import Thread
 
 log = logging.getLogger("i.task")
 
 
-class TaskManager(object):
+class ThreadPoolWorker(Thread):
+    """ Thread executing tasks from a given tasks queue """
+    def __init__(self, tasks):
+        Thread.__init__(self)
+        self.tasks = tasks
+        self.daemon = True
+        self.start()
 
-    max_workers = 10
-
-    def __init__(self, options):
-        self.options = options
-
-
-    def execute(self):
-        log.info(f"Distributing tasks to a maximum of {TaskManager.max_workers} workers")
-        with ThreadPoolExecutor(max_workers=TaskManager.max_workers) as executor:
-            futures = []
-            for path in self.options.path:
-                futures.append(executor.submit(self.options.func, path, self.options))
-            for future in as_completed(futures):
-                try:
-                    _path, files = future.result()
-                    self.display_results(_path, files)
-                except Exception as e:
-                    log.info(f"An error occurred processing {path}: {e}")
+    def run(self):
+        while True:
+            func, args, kargs = self.tasks.get()
+            try:
+                func(*args, **kargs)
+            except Exception as e:
+                # an exception happend in this thread
+                print(e)
+            finally:
+                # make this task as done, whether an
+                # exception happend or not
+                self.tasks.task_done()
 
 
-    def display_results(self, path, files):
-        log.info(f"\nFound {len(files)} files in {path}")
-        for file in files:
-            log.info(f" - {file}")
-        log.info("")
+class ThreadPoolManager():
+    """ Manages pool of threads consuming tasks from a queue """
+    def __init__(self, num_threads=5):
+        self.tasks = Queue(num_threads)
+        for _ in range(num_threads):
+            ThreadPoolWorker(self.tasks)
+
+    def add_task(self, func, *args, **kargs):
+        """ Add a task to the queue """
+        self.tasks.put((func, args, kargs))
+
+    def map(self, func, args_list):
+        """ Add a list of tasks to the queue """
+        for args in args_list:
+            self.add_task(func, args)
+
+    def wait_completion(self):
+        """ Wait for the completion of all the tasks in the queue """
+        self.tasks.join()
